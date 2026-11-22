@@ -1,0 +1,7 @@
+[profile.default]
+solc_version = "0.8.29"
+evm_version = "cancun"
+remappings = ["forge-std/=lib/forge-std/src/", "reactive-lib-omni/=lib/reactive-lib-omni/src/"]
+
+[fmt]
+tab_width = 2
