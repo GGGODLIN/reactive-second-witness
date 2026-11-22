@@ -1,0 +1,50 @@
+{
+  "deploymentStatus": "PENDING_LIVE_DEPLOYMENT",
+  "contracts": {
+    "borrowGate": null,
+    "spotPool": null,
+    "referencePoolWitness": null,
+    "secondWitnessReactive": null
+  },
+  "scenarios": [
+    {
+      "id": "flash-loan",
+      "title": "Flash-loan blocked",
+      "expected": "Base holds the unsupported amount and disburses zero when the witness-backed cap is below the borrower's minimum.",
+      "requestId": null,
+      "transactions": { "baseOrigin": null, "unichainReference": null, "lasnaVerdict": null, "baseOutcome": null }
+    },
+    {
+      "id": "synchronized",
+      "title": "Synchronized settle",
+      "expected": "A fresh Unichain trade supports full settlement in one callback. The full-loop target is about 2 seconds, pending measurement.",
+      "requestId": null,
+      "transactions": { "baseOrigin": null, "unichainReference": null, "lasnaVerdict": null, "baseOutcome": null }
+    },
+    {
+      "id": "stale",
+      "title": "Stale hold → auto-release",
+      "expected": "The stale verdict holds the request. Fresh reference trades before the deadline trigger a new verdict and release the supported amount.",
+      "requestId": null,
+      "transactions": { "baseOrigin": null, "unichainReference": null, "lasnaVerdict": null, "baseOutcome": null }
+    },
+    {
+      "id": "cancel-expire",
+      "title": "Local cancel / expire",
+      "expected": "Base releases unused collateral locally while retaining enough to cover any amount already disbursed.",
+      "requestId": null,
+      "transactions": { "baseOrigin": null, "unichainReference": null, "lasnaVerdict": null, "baseOutcome": null }
+    }
+  ],
+  "latencyBenchmark": {
+    "samplesMs": [],
+    "timeoutCount": 0,
+    "polling": { "samplesMs": [], "timeoutCount": 0 }
+  },
+  "chainlinkBaseline": {
+    "date": "2026-11-23",
+    "feed": "Base Sepolia ETH/USD",
+    "stalenessSeconds": 419,
+    "pollingBaselineMs": 7000
+  }
+}

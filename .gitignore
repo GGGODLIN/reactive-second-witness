@@ -2,6 +2,7 @@
 .env
 .env.*
 node_modules/
+dist/
 out/
 cache/
 broadcast/
