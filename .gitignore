@@ -6,3 +6,5 @@ dist/
 out/
 cache/
 broadcast/
+__pycache__/
+.vercel/

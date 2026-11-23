@@ -109,7 +109,7 @@ The 2 timeouts happened on run 10, when the initial 0.25 lREACT reserve on Lasna
 
 ## Verify it without a wallet
 
-1. Open the dashboard: `TODO(submit): Vercel URL`. The badge reads `LIVE` once every contract read succeeds. It falls back to `DETERMINISTIC_REPLAY` and names the failed endpoint if an RPC is down.
+1. Open the dashboard: [reactive-second-witness.vercel.app](https://reactive-second-witness.vercel.app). The badge reads `LIVE` once every contract read succeeds. It falls back to `DETERMINISTIC_REPLAY` and names the failed endpoint if an RPC is down.
 2. Pick a request trace and open its four explorer links. Copy the `requestId` with one click and match it on Base and Lasna.
 3. Optional: run the read-only `cast` block in the [README](https://github.com/GGGODLIN/reactive-second-witness#read-only-cast-diagnostics). It reads both debts, the latest witness, a request's state, the Lasna subscription and all four receipts.
 4. Optional: reproduce locally with `forge test`, then `cd dashboard && pnpm install && pnpm test && pnpm build`. No `.env`, API key or wallet is needed.
@@ -130,7 +130,7 @@ The 2 timeouts happened on run 10, when the initial 0.25 lREACT reserve on Lasna
 ## Links
 
 - Repository: [github.com/GGGODLIN/reactive-second-witness](https://github.com/GGGODLIN/reactive-second-witness)
-- Live dashboard: `TODO(submit): Vercel URL`
+- Live dashboard: [reactive-second-witness.vercel.app](https://reactive-second-witness.vercel.app)
 - Demo video: `TODO(submit): YouTube URL`
 
 ## Limits we know about
