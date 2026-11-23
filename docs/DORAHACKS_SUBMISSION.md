@@ -1,6 +1,6 @@
-# Second Witness — DoraHacks BUIDL submission (draft)
+# Second Witness — DoraHacks BUIDL submission
 
-Draft text for the [Reactive Omni Buildathon](https://dorahacks.io/hackathon/reactive-omni-buildathon/detail), track **Every Second Counts**. Every number below comes from the bundled receipts in [`dashboard/src/data/verified-receipts.json`](https://github.com/GGGODLIN/reactive-second-witness/blob/main/dashboard/src/data/verified-receipts.json) or from the Foundry suite. Fields marked `TODO(submit)` are filled in on the day of submission.
+Submission text for the [Reactive Omni Buildathon](https://dorahacks.io/hackathon/reactive-omni-buildathon/detail), track **Every Second Counts**. Every number below comes from the bundled receipts in [`dashboard/src/data/verified-receipts.json`](https://github.com/GGGODLIN/reactive-second-witness/blob/main/dashboard/src/data/verified-receipts.json) or from the Foundry suite.
 
 ## Submission checklist
 
@@ -11,7 +11,7 @@ The hackathon page asks for four things. This is where each one lives.
 | A link to your public repository | [github.com/GGGODLIN/reactive-second-witness](https://github.com/GGGODLIN/reactive-second-witness) (MIT) |
 | Deployed contract addresses | [Deployed contracts](#deployed-contracts) |
 | A few transaction hashes showing the full loop, from origin event to callback | [Full-loop receipts](#full-loop-receipts) |
-| A demo video under three minutes | `TODO(submit): YouTube URL` (52.6 s, English narration and subtitles) |
+| A demo video under three minutes | [youtu.be/nhDCMJIVbSk](https://youtu.be/nhDCMJIVbSk) (52.6 s, English narration and subtitles) |
 
 ## BUIDL name
 
@@ -125,13 +125,13 @@ The 2 timeouts happened on run 10, when the initial 0.25 lREACT reserve on Lasna
 
 ## Demo video
 
-`TODO(submit): YouTube URL` — 52.6 s, 1920×1080, English narration and subtitles. One request slip walks the four hops, and every hop stamps a real transaction hash.
+[youtu.be/nhDCMJIVbSk](https://youtu.be/nhDCMJIVbSk) — 52.6 s, 1920×1080, English narration and subtitles. One request slip walks the four hops, and every hop stamps a real transaction hash.
 
 ## Links
 
 - Repository: [github.com/GGGODLIN/reactive-second-witness](https://github.com/GGGODLIN/reactive-second-witness)
 - Live dashboard: [reactive-second-witness.vercel.app](https://reactive-second-witness.vercel.app)
-- Demo video: `TODO(submit): YouTube URL`
+- Demo video: [youtu.be/nhDCMJIVbSk](https://youtu.be/nhDCMJIVbSk)
 
 ## Limits we know about
 

@@ -6,7 +6,7 @@ A spot price can move inside the same Base transaction that uses it to value col
 
 ## Two-minute verification without a wallet
 
-All contracts are live on **Unichain Sepolia (`1301`)**, **Base Sepolia (`84532`)**, and **Reactive Lasna (`5318007`)** (deployed within the competition window, verified `debt == 0` on both Lasna `SYSTEM` and Base `CallbackProxy`). Open the [live evidence dashboard](https://reactive-second-witness.vercel.app) (zero wallet, zero `.env`) or run the read-only `cast` commands below to trace any `requestId` across all four hops.
+All contracts are live on **Unichain Sepolia (`1301`)**, **Base Sepolia (`84532`)**, and **Reactive Lasna (`5318007`)** (deployed within the competition window, verified `debt == 0` on both Lasna `SYSTEM` and Base `CallbackProxy`). Watch the [53-second demo video](https://youtu.be/nhDCMJIVbSk), open the [live evidence dashboard](https://reactive-second-witness.vercel.app) (zero wallet, zero `.env`), or run the read-only `cast` commands below to trace any `requestId` across all four hops.
 
 ### Live Testnet Deployments
 
