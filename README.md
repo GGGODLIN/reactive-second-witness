@@ -2,6 +2,8 @@
 
 A spot price can move inside the same Base transaction that uses it to value collateral. Second Witness keeps small borrows synchronous and asks for an independent Unichain price before disbursing a large borrow. Reactive Lasna relays the witness. Base's `BorrowGate` alone decides what can be paid and owns every collateral lock and debt balance.
 
+![Second Witness evidence dashboard reading LIVE state from Base Sepolia, Unichain Sepolia, and Reactive Lasna](https://raw.githubusercontent.com/GGGODLIN/reactive-second-witness/main/docs/screenshots/overview-live.png)
+
 ## Two-minute verification without a wallet
 
 All contracts are live on **Unichain Sepolia (`1301`)**, **Base Sepolia (`84532`)**, and **Reactive Lasna (`5318007`)** (deployed within the competition window, verified `debt == 0` on both Lasna `SYSTEM` and Base `CallbackProxy`). Open the dashboard's **Request traces** (zero wallet, zero `.env`) or run the read-only `cast` commands below to trace any `requestId` across all four hops.
@@ -18,6 +20,8 @@ All contracts are live on **Unichain Sepolia (`1301`)**, **Base Sepolia (`84532`
 
 ### Verified 4-Hop Showcase Receipts
 
+![After the same 5x SpotPool pump, UnprotectedLendingMock paid out $8,000 while BorrowGate paid $0](https://raw.githubusercontent.com/GGGODLIN/reactive-second-witness/main/docs/screenshots/flash-loan-comparison.png)
+
 | Scenario | `requestId` | Base Origin | Unichain Reference | Lasna Verdict | Base Outcome | Local test |
 | --- | --- | --- | --- | --- | --- | --- |
 | Flash-loan blocked (`$8k` drained on `UnprotectedLendingMock` [tx](https://sepolia.basescan.org/tx/0xe3be041129202009e89f3c0f8c90e69aa699df6b7f26ec0a0ad802e3f4d98821); `$0` on `BorrowGate`) | `0x78a5e55b…52a5a` | [0x7b502755…](https://sepolia.basescan.org/tx/0x7b5027551c08565a6802f7c0d5c590cc7b10260543b38b08bed0ec4cd0362f1f) | [0xa7d560af…](https://sepolia.uniscan.xyz/tx/0xa7d560afa2aaacbc4b02ce9f7d9d6f74bf7b2fc211f2802745b1f5eec8674086) | [0x04237577…](https://lasna.reactscan.net/tx/0x042375779cdc809b06ad6b3cc5f2059cfe0b19ff7586feb3230913cae2406742) | [0xf52c0bdd…](https://sepolia.basescan.org/tx/0xf52c0bdd539ac70d37d05f10152af728830a0b8a7a5a24473b50ffef11095df7) (`HELD`, `$0`) | `test_fiveXSpotSwapDrainsNaiveLenderWhileBorrowGateBlocksAndCaps` |
@@ -28,6 +32,8 @@ All contracts are live on **Unichain Sepolia (`1301`)**, **Base Sepolia (`84532`
 `LIVE` means every required contract read succeeded at page load. `DETERMINISTIC_REPLAY` explains the failed endpoint and keeps published receipt links available. A live getter shows the current state, while the linked receipt proves what happened in that transaction.
 
 ### Measured Latency Comparison (2026-11-23 Live Testnets)
+
+![Omni full loop p50 1,618 ms vs 7 s polling p50 3,686 ms on the same endpoints, with a separate Chainlink feed-age sample of 859 s](https://raw.githubusercontent.com/GGGODLIN/reactive-second-witness/main/docs/screenshots/latency-benchmark.png)
 
 | Evidence | Measurement | Successful samples | Timeouts / failures | Range (min – max) | p50 / p95 |
 | --- | --- | ---: | ---: | --- | --- |
