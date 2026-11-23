@@ -13,7 +13,6 @@ BASE_CHAIN = 84_532
 LASNA_CHAIN = 5_318_007
 SYSTEM = "0x8888888888888888888888888888888888888888"
 BASE_PROXY = "0x476f44b11f5c942c58f4c8e3d0300e5710743585"
-CALLBACKS_ABI = "getCallbacks(uint256)((uint256,address,uint256,uint256,uint256,bytes)[])"
 
 
 def rpc(url, method, *params):
@@ -80,23 +79,6 @@ def checked_receipt(url, log):
   if not receipt or int(receipt["status"], 16) != 1 or receipt["blockHash"] != log["blockHash"]:
     raise RuntimeError(f"Missing or unsuccessful receipt for {tx}")
   return receipt
-
-
-def check_delivery(lasna_rpc, reactive, relay_tx, pong_tx, deadline):
-  data = cast("calldata", "getCallbacks(uint256)", str(int(relay_tx, 16)))
-  while time.monotonic() < deadline:
-    raw = rpc(lasna_rpc, "eth_call", {"to": SYSTEM, "data": data}, "latest")
-    decoded = json.loads(cast("abi-decode", "--json", CALLBACKS_ABI, raw))
-    records = decoded["data"] if isinstance(decoded, dict) else decoded
-    for _, sender, _, chain, tx_hash, error_data in records[0]:
-      if sender.lower() != reactive or int(chain) != BASE_CHAIN:
-        continue
-      if error_data != "0x":
-        raise RuntimeError(f"Callback from {relay_tx} recorded a destination error")
-      if int(tx_hash) == int(pong_tx, 16):
-        return
-    time.sleep(1)
-  raise RuntimeError(f"No successful SYSTEM callback record linking {relay_tx} to {pong_tx}")
 
 
 def read_uint(url, contract, signature, argument):

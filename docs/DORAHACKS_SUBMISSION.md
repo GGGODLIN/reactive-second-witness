@@ -135,6 +135,8 @@ The 2 timeouts happened on run 10, when the initial 0.25 lREACT reserve on Lasna
 
 ## Limits we know about
 
-- Testnets only, with mock tokens (mETH, mUSDC) and demo risk parameters.
+- Testnets only, with mock tokens (mETH, mUSDC) and demo risk parameters; synchronous `smallBorrowLimit` (`500 mUSDC`) is a per-call cap in this demo.
+- The 4-slot simultaneous Lasna re-evaluation gas bound (`690,563 gas < 800,000`) is verified in Foundry local simulation (`testFourSlotFanOutGasAndAllCallbacksSettle`); the 22 live testnet benchmark loops ran serially.
+- In a transient race where Base closes a slot right before Lasna indexes `BorrowClosed`, a 5th concurrent request still receives its initial `revision = 1` verdict on Base and always retains permissionless local `cancelRequest` / `expireRequest` exit, though automatic `revision >= 2` hold tracking skips if all 4 Lasna slots are still occupied.
 - The Chainlink staleness is one dated sample, not a distribution.
 - Latency was measured through public RPC endpoints, so it includes their response times.

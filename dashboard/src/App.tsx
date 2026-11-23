@@ -125,7 +125,7 @@ function LatencySection({ latencyBenchmark, chainlinkBaseline, deploymentStatus 
         <h2 id="latency-heading">Latency evidence</h2>
         <p className="section-kicker">{`${omni.sampleCount} loops · ${timeoutCount} timeouts`}</p>
       </div>
-      <p className="section-note">Both loop methods use the same start and end points: submission of the Base borrow request and observation of the Base outcome receipt. The Chainlink sample measures feed age separately.</p>
+      <p className="section-note">Both loop methods use the same start and end points: Base BorrowRequested mined and Base BorrowOutcome receipt observed. The Chainlink sample measures feed age separately.</p>
       <LatencyCharts latencyBenchmark={latencyBenchmark} chainlinkBaseline={chainlinkBaseline} />
       <div className="card table-wrap" tabIndex={0} role="region" aria-label="Scrollable latency table">
         <table>

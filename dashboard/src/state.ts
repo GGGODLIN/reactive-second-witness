@@ -49,7 +49,7 @@ function decodeRequest(words: string[]): RequestState {
     keptCollateral, lastEffectivePrice, createdAt, deadline, lastRevision, statusValue] =
     values.map((word) => BigInt(`0x${word}`))
   const status = statusNames[Number(statusValue)]
-  if (!/^0{24}/.test(borrower) || !status || createdAt >= 2n ** 64n || deadline >= 2n ** 64n || lastRevision >= 2n ** 32n) {
+  if (!/^0{24}/.test(borrower) || !status || status === 'NONE' || createdAt >= 2n ** 64n || deadline >= 2n ** 64n || lastRevision >= 2n ** 32n) {
     throw new Error('invalid requestState ABI fields')
   }
   return {
@@ -149,11 +149,16 @@ export async function loadDashboardState({ receipts = bundledReceipts, fetcher, 
     })
   )
 
+  const MAX_JS_DATE_SECONDS = 8_640_000_000_000n
   const results = await Promise.allSettled([
     uint('lasna', 'SYSTEM.debt', LASNA_SYSTEM, selectors.debt + addressArg(secondWitnessReactive)),
     uint('base', 'CallbackProxy.debt', BASE_CALLBACK_PROXY, selectors.debt + addressArg(borrowGate)),
     uint('lasna', 'latestPriceE18', secondWitnessReactive, selectors.latestPriceE18),
-    uint('lasna', 'latestTradedAt', secondWitnessReactive, selectors.latestTradedAt, 64n),
+    call('lasna', 'latestTradedAt', secondWitnessReactive, selectors.latestTradedAt, 1, ([word]) => {
+      const value = BigInt(`0x${word}`)
+      if (value >= 2n ** 64n || value > MAX_JS_DATE_SECONDS) throw new Error('timestamp out of Date range')
+      return value
+    }),
     uint('lasna', 'latestTradeSeq', secondWitnessReactive, selectors.latestTradeSeq, 64n),
     uint('base', 'SpotPool.priceE18', spotPool, selectors.priceE18),
     uint('unichain', 'ReferencePoolWitness.priceE18', referencePoolWitness, selectors.priceE18),

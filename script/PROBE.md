@@ -38,6 +38,6 @@ python3 script/observe_probe.py "$ORIGIN" "$REACTIVE" "$RECEIVER"
 forge script script/ProbeLive.s.sol:ProbeLive --sig 'ping(address)' "$ORIGIN" --broadcast
 ```
 
-每次成功觀察會輸出一筆 JSON，包含 filter ID、ping ID、三筆交易 hash、兩個 debt 值、接收狀態與各段秒數。觀察器核對三筆成功收據、Base 交易的 CallbackProxy 目的地，以及 [SYSTEM 回呼紀錄](https://github.com/Reactive-Network/documentation/blob/main/docs/docs/economy.mdx) 的目的交易 hash 和空白錯誤欄位。它也會透過 RPC 確認 `received(pingId)` 為真且兩側 `debt(address)` 都為零。
+每次成功觀察會輸出一筆 JSON，包含 filter ID、ping ID、三筆交易 hash、兩個 debt 值、接收狀態與各段秒數。觀察器核對三筆成功收據（`status == 1`）、Base 回呼交易的目標為官方 `CallbackProxy`、並透過 RPC 確認 `received(pingId)` 為真且 Lasna `SYSTEM` 與 Base `CallbackProxy` 兩側 `debt(address)` 都為零。
 
 依票據收集 5–10 筆樣本，每次先啟動觀察器再送 ping。秒數來自同一台機器的 monotonic clock，從各事件首次被 RPC 讀到的時間計算，會受索引、輪詢及 RPC 延遲影響。若到期仍缺事件，保留已有交易 hash 並用區塊瀏覽器查對 Lasna `ReactiveContractReverted` 或 Base `CallbackFailure`。

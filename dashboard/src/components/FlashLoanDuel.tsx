@@ -21,7 +21,7 @@ export function FlashLoanDuel({ scenario, live }: FlashLoanDuelProps) {
   const lenderUrl = buildExplorerAddressUrl('base', flashLoanEvidence.lenderAddress)
   const outcomeHash = scenario.transactions.baseOutcome
   const outcomeUrl = buildExplorerTxUrl('base', outcomeHash)
-  const paid = live ? live.disbursedAmount : flashLoanEvidence.gatePaidRaw
+  const paid = flashLoanEvidence.gatePaidRaw
 
   return (
     <section aria-labelledby="duel-heading">

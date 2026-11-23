@@ -11,6 +11,10 @@ import {SecondWitnessReactive} from "../src/SecondWitnessReactive.sol";
 import {SpotPool} from "../src/SpotPool.sol";
 import {UnprotectedLendingMock} from "../src/UnprotectedLendingMock.sol";
 
+interface IReserveVault is IPayable {
+  function depositTo(address) external payable;
+}
+
 contract DeploySecondWitness is Script {
   uint256 private constant UNICHAIN_SEPOLIA = 1_301;
   uint256 private constant BASE_SEPOLIA = 84_532;
@@ -84,21 +88,29 @@ contract DeploySecondWitness is Script {
     SecondWitnessReactive reactive = new SecondWitnessReactive{value: funding}(
       UNICHAIN_SEPOLIA, referencePool, BASE_SEPOLIA, REQUIRED_FRESH_TRADES, CALLBACK_GAS_LIMIT
     );
+    IReserveVault(payable(0x8888888888888888888888888888888888888888)).depositTo{value: funding}(address(reactive));
     vm.stopBroadcast();
+    require(
+      IReserveVault(payable(0x8888888888888888888888888888888888888888)).debt(address(reactive)) == 0,
+      "Non-zero Lasna debt"
+    );
     console2.log("SECOND_WITNESS_REACTIVE", address(reactive));
   }
 
-  function deployBaseGate(address reactive, address spotPoolAddr, address baseEth, address baseUsdc) external {
+  function deployBaseGate(address reactive, address spotPoolAddr) external {
     require(reactive != address(0) && spotPoolAddr != address(0), "Missing dependency");
     _selectChain("BASE_SEPOLIA_RPC", BASE_SEPOLIA);
     uint256 pk = vm.envUint("DEPLOYER_PRIVATE_KEY");
     uint256 funding = vm.envUint("BASE_GATE_FUND_WEI");
     require(funding != 0, "Missing BASE_GATE_FUND_WEI");
+    SpotPool pool = SpotPool(spotPoolAddr);
+    MockERC20 baseEth = pool.mETH();
+    MockERC20 baseUsdc = pool.mUSDC();
     vm.startBroadcast(pk);
     BorrowGate gate = new BorrowGate(
       IPayable(payable(BASE_CALLBACK_PROXY)),
       reactive,
-      SpotPool(spotPoolAddr),
+      pool,
       SMALL_BORROW_LIMIT,
       MAX_EVIDENCE_AGE,
       MAX_CLOCK_SKEW,
@@ -107,11 +119,14 @@ contract DeploySecondWitness is Script {
     );
     (bool funded,) = payable(address(gate)).call{value: funding}("");
     require(funded, "Funding BorrowGate failed");
-    MockERC20(baseUsdc).mint(address(gate), 500_000e6);
-    MockERC20(baseEth).approve(address(gate), type(uint256).max);
-    MockERC20(baseUsdc).approve(address(gate), type(uint256).max);
+    IReserveVault(payable(BASE_CALLBACK_PROXY)).depositTo{value: funding}(address(gate));
+    baseUsdc.mint(address(gate), 500_000e6);
+    baseEth.approve(address(gate), type(uint256).max);
+    baseUsdc.approve(address(gate), type(uint256).max);
     gate.depositCollateral(100e18);
     vm.stopBroadcast();
+    require(baseUsdc.balanceOf(address(gate)) >= 500_000e6, "Gate liquidity not funded");
+    require(IReserveVault(payable(BASE_CALLBACK_PROXY)).debt(address(gate)) == 0, "Non-zero Base debt");
     console2.log("BORROW_GATE", address(gate));
   }
 

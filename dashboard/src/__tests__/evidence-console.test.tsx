@@ -134,4 +134,38 @@ describe('evidence console', () => {
     expect(screen.getAllByText('Percentiles need 20+ samples')).toHaveLength(2)
     expect(within(screen.getByLabelText('Key evidence')).getAllByText('—').length).toBeGreaterThanOrEqual(3)
   })
+
+  it('degrades to DETERMINISTIC_REPLAY when latestTradedAt exceeds JS Date range without crashing', async () => {
+    const word = (value: bigint) => value.toString(16).padStart(64, '0')
+    const overflowTimestamp = 9_000_000_000_000n // valid uint64 but exceeds JS Date max
+    const fetcher = vi.fn<typeof fetch>(async (_input, init) => {
+      const { id, params } = JSON.parse(String(init?.body))
+      const selector = String(params[0].data).slice(0, 10)
+      const result = selector === '0x05b90773'
+        ? [37n, 8_000_000_000n, 8_000_000_000n, 9n, 0n, 0n, 0n, 20n, 30n, 3n, 2n].map(word).join('')
+        : selector === '0xbfa8ea11'
+          ? word(overflowTimestamp)
+          : word(11n)
+      return Response.json({ jsonrpc: '2.0', id, result: `0x${result}` })
+    })
+    render(<App fetcher={fetcher} />)
+    expect((await screen.findAllByText(/timestamp out of Date range/i)).length).toBeGreaterThanOrEqual(1)
+    expect(screen.getByRole('status').textContent).toBe('DETERMINISTIC_REPLAY')
+    expect(screen.getByRole('link', { name: /Drain transaction/i }).getAttribute('href')).toMatch(/^https:\/\//)
+  })
+
+  it('degrades to DETERMINISTIC_REPLAY when a published requestId returns NONE status from a lagging RPC', async () => {
+    const word = (value: bigint) => value.toString(16).padStart(64, '0')
+    const fetcher = vi.fn<typeof fetch>(async (_input, init) => {
+      const { id, params } = JSON.parse(String(init?.body))
+      const selector = String(params[0].data).slice(0, 10)
+      const result = selector === '0x05b90773'
+        ? [0n, 0n, 0n, 0n, 0n, 0n, 0n, 0n, 0n, 0n, 0n].map(word).join('')
+        : word(selector === '0xbfa8ea11' ? 1_795_401_288n : 11n)
+      return Response.json({ jsonrpc: '2.0', id, result: `0x${result}` })
+    })
+    render(<App fetcher={fetcher} />)
+    expect((await screen.findAllByText(/invalid requestState ABI fields/i)).length).toBeGreaterThanOrEqual(1)
+    expect(screen.getByRole('status').textContent).toBe('DETERMINISTIC_REPLAY')
+  })
 })
