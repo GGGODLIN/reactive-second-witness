@@ -87,12 +87,12 @@ Each row is one `requestId` traced across all four hops: the origin event on Bas
 
 ## Measured latency (live testnets, 2026-11-23)
 
-Both loop methods use the same start and end points: the Base `BorrowRequested` transaction mined, then the Base `BorrowOutcome` observed.
+Reactive Omni durations measure the real live testnet loop from Base `BorrowRequested` transaction mined to Base `BorrowOutcome` observed on the public Base Sepolia RPC endpoint. The 7 s polling baseline models a fixed 7,000 ms polling cadence (`uniform phase wait + measured same-endpoint Base RPC read latency + 200 ms Base block time`, `N = 20`) rather than sending 20 separate polled transactions.
 
 | Method | Successful samples | Timeouts | Range | p50 | p95 |
 | --- | ---: | ---: | --- | ---: | ---: |
-| Reactive Omni full loop | 22 | 2 | 284 – 3,037 ms | **1,618 ms** | **2,785 ms** |
-| 7 s polling bot, same endpoints | 20 | 0 | 514 – 7,185 ms | 3,686 ms | 6,845 ms |
+| Reactive Omni full loop (live testnets) | 22 | 2 | 284 – 3,037 ms | **1,618 ms** | **2,785 ms** |
+| 7 s polling cadence model (same-endpoint RPC + uniform phase) | 20 | 0 | 514 – 7,185 ms | 3,686 ms | 6,845 ms |
 | Chainlink ETH/USD on Base Sepolia, feed age | 1 | — | 859 s | — | — |
 
 The Chainlink row is a different measurement: how long ago the on-chain price was last updated, sampled once. It is there for scale. 859,000 ms ÷ 1,618 ms ≈ 531, so that sample was about 531 times older than our median loop. Percentiles use the nearest rank and need at least 20 samples.
@@ -121,7 +121,7 @@ The 2 timeouts happened on run 10, when the initial 0.25 lREACT reserve on Lasna
 | Execution | Every row in [Full-loop receipts](#full-loop-receipts) links the reactive transaction on Lasna and the callback it triggered on Base. |
 | Integration | The reactive contract does the cross-chain work: it watches two chains, keeps the witness, tracks held requests and fires re-evaluations on fresh trades. No off-chain bot is involved. |
 | Usefulness | Lenders on fast L2s keep synchronous small borrows and get flash-loan resistance on large ones, at about 1.6 s of added latency instead of a multi-minute TWAP. |
-| Craft | Invariant-fuzzed contracts, a zero-env dashboard with 25 Vitest tests, a README you can verify from, and live receipts for every claim. |
+| Craft | Invariant-fuzzed contracts, a zero-env dashboard with 27 Vitest tests, a README you can verify from, and live receipts for every claim. |
 
 ## Demo video
 

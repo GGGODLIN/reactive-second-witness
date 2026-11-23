@@ -37,8 +37,8 @@ All contracts are live on **Unichain Sepolia (`1301`)**, **Base Sepolia (`84532`
 
 | Evidence | Measurement | Successful samples | Timeouts / failures | Range (min – max) | p50 / p95 |
 | --- | --- | ---: | ---: | --- | --- |
-| Reactive Omni full loop | Base `BorrowRequested` mined → Base `BorrowOutcome` observed (same endpoint) | 22 | 2\* | `284 ms` – `3,037 ms` | **`1,618 ms` / `2,785 ms`** |
-| 7 s polling baseline | Same Base RPC endpoint, 7,000 ms fixed polling cadence + RPC check | 20 | 0 | `514 ms` – `7,185 ms` | `3,686 ms` / `6,845 ms` |
+| Reactive Omni full loop | Base `BorrowRequested` mined → Base `BorrowOutcome` observed (live testnets, same RPC endpoint) | 22 | 2\* | `284 ms` – `3,037 ms` | **`1,618 ms` / `2,785 ms`** |
+| 7 s polling cadence model | Same Base RPC endpoint read latency + uniform 7,000 ms polling phase + 200 ms Base block (modeled baseline, not 20 separate tx loops) | 20 | 0 | `514 ms` – `7,185 ms` | `3,686 ms` / `6,845 ms` |
 | Chainlink Base Sepolia ETH/USD | Feed age (`head - updatedAt`) on `0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1`, sampled 2026-11-23 | 1 | 0 | `859 s` (`14m 19s`) | — |
 
 \*The 2 recorded timeouts occurred on run 10 when the initial `0.25 lREACT` Lasna reserve briefly hit `debt = 0.020 lREACT` and halted callback delivery; topping up via `SYSTEM.depositTo(reactive)` immediately cleared debt to `0` and all remaining 13 loops completed with `0` timeouts and final `lasnaDebt == 0`, `baseDebt == 0`. All 22 raw durations (in ms) are bundled in `dashboard/src/data/verified-receipts.json`.
