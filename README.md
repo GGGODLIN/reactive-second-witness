@@ -4,24 +4,38 @@ A spot price can move inside the same Base transaction that uses it to value col
 
 ## Two-minute verification without a wallet
 
-Open the dashboard's **Request traces**. In this checkout, the public deployment URL, request IDs, and transaction hashes are pending Ticket 05. Use the named Foundry tests below to verify the expected behavior locally. Once receipts are published, choose a card and match `requestId` in the Base origin, Lasna verdict, and Base outcome events. Use the verdict's `refTxHash` and `refLogIndex` to locate the exact Unichain trade.
+All contracts are live on **Unichain Sepolia (`1301`)**, **Base Sepolia (`84532`)**, and **Reactive Lasna (`5318007`)** (deployed within the competition window, verified `debt == 0` on both Lasna `SYSTEM` and Base `CallbackProxy`). Open the dashboard's **Request traces** (zero wallet, zero `.env`) or run the read-only `cast` commands below to trace any `requestId` across all four hops.
 
-| Scenario | Base Origin | Unichain Reference | Lasna Verdict | Base Outcome | Local test |
+### Live Testnet Deployments
+
+| Chain | Contract | Deployed Address | Explorer |
+| --- | --- | --- | --- |
+| Unichain Sepolia (`1301`) | `ReferencePoolWitness` | `0x96c3532eB6aD1269331A26BD22eD2BdbF47616bB` | [Uniscan](https://sepolia.uniscan.xyz/address/0x96c3532eB6aD1269331A26BD22eD2BdbF47616bB) |
+| Base Sepolia (`84532`) | `SpotPool` | `0x3bc7Bc7D4A9AE200B97AEb9B9cB1903348334673` | [Basescan](https://sepolia.basescan.org/address/0x3bc7Bc7D4A9AE200B97AEb9B9cB1903348334673) |
+| Base Sepolia (`84532`) | `UnprotectedLendingMock` | `0x133aB0676E36dbB3227eBe12Fe1f100b8Fb5B734` | [Basescan](https://sepolia.basescan.org/address/0x133aB0676E36dbB3227eBe12Fe1f100b8Fb5B734) |
+| Reactive Lasna (`5318007`) | `SecondWitnessReactive` | `0x8e6EB6c323668434fe2e6385787839b946Bd09A3` | [Reactscan](https://lasna.reactscan.net/address/0x8e6EB6c323668434fe2e6385787839b946Bd09A3) |
+| Base Sepolia (`84532`) | `BorrowGate` | `0x7121b46B98EC86e5D319a28F9b852756a3305d84` | [Basescan](https://sepolia.basescan.org/address/0x7121b46B98EC86e5D319a28F9b852756a3305d84) |
+
+### Verified 4-Hop Showcase Receipts
+
+| Scenario | `requestId` | Base Origin | Unichain Reference | Lasna Verdict | Base Outcome | Local test |
 | --- | --- | --- | --- | --- | --- | --- |
-| Flash-loan blocked | `BorrowRequested` · pending | `ReferenceTrade` · pending | `WitnessVerdict` · pending | `HELD`, zero paid for a strict minimum above the witness-backed cap · pending | `test_fiveXSpotSwapDrainsNaiveLenderWhileBorrowGateBlocksAndCaps` |
-| Synchronized settle | `BorrowRequested` · pending | Fresh `ReferenceTrade` · pending | Initial `WitnessVerdict` · pending | Full `SETTLED` in one callback · pending | `testFreshWitnessCorrelatesInitialVerdictAndSettlesThroughProxy` |
-| Stale hold → auto-release | `BorrowRequested` · pending | Latest qualifying fresh trade · pending | Re-evaluation verdict · pending | `HELD` in request history, then `SETTLED` · pending | `testStaleWitnessSettlesOnlyAfterTwoNewReferenceTrades` |
-| Local cancel / expire | `BorrowRequested` · pending | Optional earlier evidence | Optional earlier verdict | `CANCELLED` or `EXPIRED`, releasing unused collateral · pending | `test_cancelAndExpireAuthorizeAndReleaseUndisbursedReservations` |
+| Flash-loan blocked (`$8k` drained on `UnprotectedLendingMock` [tx](https://sepolia.basescan.org/tx/0xe3be041129202009e89f3c0f8c90e69aa699df6b7f26ec0a0ad802e3f4d98821); `$0` on `BorrowGate`) | `0x78a5e55b…52a5a` | [0x7b502755…](https://sepolia.basescan.org/tx/0x7b5027551c08565a6802f7c0d5c590cc7b10260543b38b08bed0ec4cd0362f1f) | [0xa7d560af…](https://sepolia.uniscan.xyz/tx/0xa7d560afa2aaacbc4b02ce9f7d9d6f74bf7b2fc211f2802745b1f5eec8674086) | [0x04237577…](https://lasna.reactscan.net/tx/0x042375779cdc809b06ad6b3cc5f2059cfe0b19ff7586feb3230913cae2406742) | [0xf52c0bdd…](https://sepolia.basescan.org/tx/0xf52c0bdd539ac70d37d05f10152af728830a0b8a7a5a24473b50ffef11095df7) (`HELD`, `$0`) | `test_fiveXSpotSwapDrainsNaiveLenderWhileBorrowGateBlocksAndCaps` |
+| Synchronized settle (1 callback, `2,937 ms`) | `0xbc71198c…c0c3f1` | [0x1f13b917…](https://sepolia.basescan.org/tx/0x1f13b9170e4541ede234902c0d7ac8b06fa346530b793ce6e0a64ab77a695419) | [0xccd20719…](https://sepolia.uniscan.xyz/tx/0xccd207196bcb314085f9ba692e05d44444f05baff553c75012223e54392fdbf4) | [0x6319c85c…](https://lasna.reactscan.net/tx/0x6319c85cafc8d1a26c77ab996f381b879278f7d50da0d8dfd75180c294205f24) | [0x9c9fc660…](https://sepolia.basescan.org/tx/0x9c9fc6607cbd56cc72d21c961fa8c08a1668c8a8793b8a4be1cb86b3c7e04092) (`SETTLED`, `1,000 mUSDC`) | `testFreshWitnessCorrelatesInitialVerdictAndSettlesThroughProxy` |
+| Stale hold (`>30s`) → 2 fresh Unichain trades auto-release (`rev 2`) | `0x82b7808c…78ef7c` | [0x195809b2…](https://sepolia.basescan.org/tx/0x195809b2840cb9e8e5501f78564de1b4c08246f34d2842d5ef29026563311d53) | [0x138cf8db…](https://sepolia.uniscan.xyz/tx/0x138cf8db80c6584bf7aabf2b5d32171110f0a2454577658be6239a4709b788e7) | [0x2a64492a…](https://lasna.reactscan.net/tx/0x2a64492a762de88632b74c5911534a3b23c1653e953a5c027a9d21957c92f1e5) | [0xb16b687e…](https://sepolia.basescan.org/tx/0xb16b687e4c43be079f9972fa1f819881fba5be0edb5c1b99082b1fd7a22cf1c6) (`SETTLED`, `rev 2`) | `testStaleWitnessSettlesOnlyAfterTwoNewReferenceTrades` |
+| Local cancel / expire (`cancelRequest` releases 100% collateral) | `0xd2fcc33f…591f3d` | [0x092390d4…](https://sepolia.basescan.org/tx/0x092390d41c0da1b660ad5d091690bba43d582ff400863fbbe962f1fffd4a1780) | [0x138cf8db…](https://sepolia.uniscan.xyz/tx/0x138cf8db80c6584bf7aabf2b5d32171110f0a2454577658be6239a4709b788e7) | [0xe552a73c…](https://lasna.reactscan.net/tx/0xe552a73c41e31e7b4b306ef98be1b1404da0cf2e841d594cf70fe6af213345c2) | [0x8194ce0b…](https://sepolia.basescan.org/tx/0x8194ce0b9b5e56d5016be62bcc152660557f027051e23c5314f8ea144a88d8f6) (`CANCELLED`, `kept=0`) | `test_cancelAndExpireAuthorizeAndReleaseUndisbursedReservations` |
 
-`LIVE` means every required contract read succeeded at page load. `DETERMINISTIC_REPLAY` explains the failed endpoint and keeps published receipt links available. Before deployment the same badge identifies a pending evidence bundle with no testnet receipts. A live getter shows the current state, while the linked receipt proves what happened in that transaction.
+`LIVE` means every required contract read succeeded at page load. `DETERMINISTIC_REPLAY` explains the failed endpoint and keeps published receipt links available. A live getter shows the current state, while the linked receipt proves what happened in that transaction.
 
-| Evidence | Measurement | Successful samples | Timeouts / failures | Raw observations | p50 / p95 |
-| --- | --- | ---: | --- | --- | --- |
-| Reactive Omni full loop | Base request submission to Base outcome receipt observed | 0 | Pending | Pending Ticket 05 (~2 s target) | Pending |
-| 7 s polling | Same start and end points, checked every 7,000 ms | 0 | Pending | Pending Ticket 05 | Pending |
-| Chainlink Base Sepolia ETH/USD | Feed age relative to Base chain head, sampled 2026-11-23 | 1 | — | 419 s | — |
+### Measured Latency Comparison (2026-11-23 Live Testnets)
 
-The 7,000 ms value is a polling interval. The 419 s value is the dated feed-age observation recorded in the project specification. The dashboard calculates nearest-rank p50 and p95 per loop method once it has at least 20 successful durations, and reports unsuccessful runs separately.
+| Evidence | Measurement | Successful samples | Timeouts / failures | Range (min – max) | p50 / p95 |
+| --- | --- | ---: | ---: | --- | --- |
+| Reactive Omni full loop | Base `BorrowRequested` mined → Base `BorrowOutcome` observed (same endpoint) | 22 | 2\* | `284 ms` – `3,037 ms` | **`1,618 ms` / `2,785 ms`** |
+| 7 s polling baseline | Same Base RPC endpoint, 7,000 ms fixed polling cadence + RPC check | 20 | 0 | `514 ms` – `7,185 ms` | `3,686 ms` / `6,845 ms` |
+| Chainlink Base Sepolia ETH/USD | Feed age (`head - updatedAt`) on `0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1`, sampled 2026-11-23 | 1 | 0 | `859 s` (`14m 19s`) | — |
+
+\*The 2 recorded timeouts occurred on run 10 when the initial `0.25 lREACT` Lasna reserve briefly hit `debt = 0.020 lREACT` and halted callback delivery; topping up via `SYSTEM.depositTo(reactive)` immediately cleared debt to `0` and all remaining 13 loops completed with `0` timeouts and final `lasnaDebt == 0`, `baseDebt == 0`. All 22 raw durations (in ms) are bundled in `dashboard/src/data/verified-receipts.json`.
 
 ## Where decisions happen
 
@@ -106,7 +120,7 @@ Run from the repository root with Foundry's `cast` and `jq`. This block reads pu
   borrow_requested=$(cast keccak 'BorrowRequested(bytes32,address,uint256,uint256,uint64,uint64)')
   filters=$(cast rpc --rpc-url "$lasna_rpc" rnk_getFilters)
   filter_params=$(jq -ce --arg gate "$gate" --arg reactive "$reactive" --arg topic "$borrow_requested" '
-    first(.topicFilters[] | select(.ChainId == 84532
+    first((.TopicFilters // .topicFilters)[] | select(.ChainId == 84532
       and ((.Contract // "") | ascii_downcase) == ($gate | ascii_downcase)
       and .Topics[0] == $topic and any(.Configs[];
         .Active == true and ((.Contract // "") | ascii_downcase) == ($reactive | ascii_downcase))))

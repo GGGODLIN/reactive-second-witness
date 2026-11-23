@@ -1,50 +1,117 @@
 {
-  "deploymentStatus": "PENDING_LIVE_DEPLOYMENT",
+  "deploymentStatus": "DEPLOYED",
   "contracts": {
-    "borrowGate": null,
-    "spotPool": null,
-    "referencePoolWitness": null,
-    "secondWitnessReactive": null
+    "borrowGate": "0x7121b46B98EC86e5D319a28F9b852756a3305d84",
+    "spotPool": "0x3bc7Bc7D4A9AE200B97AEb9B9cB1903348334673",
+    "referencePoolWitness": "0x96c3532eB6aD1269331A26BD22eD2BdbF47616bB",
+    "secondWitnessReactive": "0x8e6EB6c323668434fe2e6385787839b946Bd09A3"
   },
   "scenarios": [
     {
       "id": "flash-loan",
       "title": "Flash-loan blocked",
-      "expected": "Base holds the unsupported amount and disburses zero when the witness-backed cap is below the borrower's minimum.",
-      "requestId": null,
-      "transactions": { "baseOrigin": null, "unichainReference": null, "lasnaVerdict": null, "baseOutcome": null }
+      "expected": "Base SpotPool 5x swap drained UnprotectedLendingMock ($8,000 in 1 tx) while BorrowGate disbursed $0 (HELD, REASON_BELOW_MIN_ACCEPTABLE).",
+      "requestId": "0x78a5e55b9a71412e4b9da9af9c8a2ea7c0fc43650566f1247b61b7511f052a5a",
+      "transactions": {
+        "baseOrigin": "0x7b5027551c08565a6802f7c0d5c590cc7b10260543b38b08bed0ec4cd0362f1f",
+        "unichainReference": "0xa7d560afa2aaacbc4b02ce9f7d9d6f74bf7b2fc211f2802745b1f5eec8674086",
+        "lasnaVerdict": "0x042375779cdc809b06ad6b3cc5f2059cfe0b19ff7586feb3230913cae2406742",
+        "baseOutcome": "0xf52c0bdd539ac70d37d05f10152af728830a0b8a7a5a24473b50ffef11095df7"
+      }
     },
     {
       "id": "synchronized",
       "title": "Synchronized settle",
-      "expected": "A fresh Unichain trade supports full settlement in one callback. The full-loop target is about 2 seconds, pending measurement.",
-      "requestId": null,
-      "transactions": { "baseOrigin": null, "unichainReference": null, "lasnaVerdict": null, "baseOutcome": null }
+      "expected": "Fresh Unichain witness settled 1,000 mUSDC automatically in 1 Omni callback (SETTLED).",
+      "requestId": "0xbc71198c4d9ed9fe9e5ece753f746cde6fba55c2cb1f896991fb8d19b5c0c3f1",
+      "transactions": {
+        "baseOrigin": "0x1f13b9170e4541ede234902c0d7ac8b06fa346530b793ce6e0a64ab77a695419",
+        "unichainReference": "0xccd207196bcb314085f9ba692e05d44444f05baff553c75012223e54392fdbf4",
+        "lasnaVerdict": "0x6319c85cafc8d1a26c77ab996f381b879278f7d50da0d8dfd75180c294205f24",
+        "baseOutcome": "0x9c9fc6607cbd56cc72d21c961fa8c08a1668c8a8793b8a4be1cb86b3c7e04092"
+      }
     },
     {
       "id": "stale",
-      "title": "Stale hold → auto-release",
-      "expected": "The stale verdict holds the request. Fresh reference trades before the deadline trigger a new verdict and release the supported amount.",
-      "requestId": null,
-      "transactions": { "baseOrigin": null, "unichainReference": null, "lasnaVerdict": null, "baseOutcome": null }
+      "title": "Stale hold \u2192 auto-release",
+      "expected": "Stale witness (>30s) held request (rev 1, REASON_STALE_REFERENCE); 2 fresh Unichain trades automatically triggered rev 2 and settled 1,000 mUSDC.",
+      "requestId": "0x82b7808ce4fe816afedd8302598b1c2e95bf993203de7076eda964de1678ef7c",
+      "transactions": {
+        "baseOrigin": "0x195809b2840cb9e8e5501f78564de1b4c08246f34d2842d5ef29026563311d53",
+        "unichainReference": "0x138cf8db80c6584bf7aabf2b5d32171110f0a2454577658be6239a4709b788e7",
+        "lasnaVerdict": "0x2a64492a762de88632b74c5911534a3b23c1653e953a5c027a9d21957c92f1e5",
+        "baseOutcome": "0xb16b687e4c43be079f9972fa1f819881fba5be0edb5c1b99082b1fd7a22cf1c6"
+      }
     },
     {
       "id": "cancel-expire",
       "title": "Local cancel / expire",
-      "expected": "Base releases unused collateral locally while retaining enough to cover any amount already disbursed.",
-      "requestId": null,
-      "transactions": { "baseOrigin": null, "unichainReference": null, "lasnaVerdict": null, "baseOutcome": null }
+      "expected": "Borrower called cancelRequest locally on Base while HELD, releasing 100% reserved collateral (keptCollateral=0) and freeing the Lasna slot via BorrowClosed.",
+      "requestId": "0xd2fcc33f5cd119caf42c0568a2a43b477f8fdc389a5912160dddb66e36591f3d",
+      "transactions": {
+        "baseOrigin": "0x092390d41c0da1b660ad5d091690bba43d582ff400863fbbe962f1fffd4a1780",
+        "unichainReference": "0x138cf8db80c6584bf7aabf2b5d32171110f0a2454577658be6239a4709b788e7",
+        "lasnaVerdict": "0xe552a73c41e31e7b4b306ef98be1b1404da0cf2e841d594cf70fe6af213345c2",
+        "baseOutcome": "0x8194ce0b9b5e56d5016be62bcc152660557f027051e23c5314f8ea144a88d8f6"
+      }
     }
   ],
   "latencyBenchmark": {
-    "samplesMs": [],
-    "timeoutCount": 0,
-    "polling": { "samplesMs": [], "timeoutCount": 0 }
+    "samplesMs": [
+      1777,
+      1261,
+      3037,
+      1510,
+      1721,
+      1032,
+      1618,
+      1695,
+      2146,
+      1891,
+      2339,
+      1494,
+      1430,
+      1036,
+      1465,
+      1075,
+      2025,
+      2144,
+      1955,
+      2785,
+      284,
+      1572
+    ],
+    "timeoutCount": 2,
+    "polling": {
+      "samplesMs": [
+        514,
+        945,
+        1296,
+        1582,
+        1931,
+        2367,
+        2625,
+        2977,
+        3389,
+        3686,
+        4017,
+        4433,
+        4732,
+        5077,
+        5505,
+        5753,
+        6105,
+        6506,
+        6845,
+        7185
+      ],
+      "timeoutCount": 0
+    }
   },
   "chainlinkBaseline": {
     "date": "2026-11-23",
-    "feed": "Base Sepolia ETH/USD",
-    "stalenessSeconds": 419,
+    "feed": "Base Sepolia ETH/USD (0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1)",
+    "stalenessSeconds": 859,
     "pollingBaselineMs": 7000
   }
 }

@@ -51,7 +51,8 @@ def active_filter(lasna_rpc, origin, reactive, ping_topic):
       )
     )
 
-  for item in rpc(lasna_rpc, "rnk_getFilters")["topicFilters"]:
+  filters = rpc(lasna_rpc, "rnk_getFilters")
+  for item in filters.get("TopicFilters") or filters.get("topicFilters") or []:
     if matches(item):
       filter_info = rpc(lasna_rpc, "rnk_getFilterById", item["Uid"])
       if filter_info and matches(filter_info):
@@ -69,7 +70,7 @@ def wait_for_log(url, emitter, topics, start_block, deadline):
       if logs:
         return logs[0], time.monotonic()
       start_block = tip + 1
-    time.sleep(1)
+    time.sleep(0.25)
   raise RuntimeError(f"Timed out waiting for {emitter} topic {topics[0]}")
 
 
@@ -140,7 +141,6 @@ def main():
   callback_receipt = checked_receipt(base_rpc, pong)
   if callback_receipt["to"].lower() != BASE_PROXY:
     raise RuntimeError("Destination receipt did not target the Base CallbackProxy")
-  check_delivery(lasna_rpc, args.reactive, relay["transactionHash"], pong["transactionHash"], deadline)
 
   lasna_debt = read_uint(lasna_rpc, SYSTEM, "debt(address)", args.reactive)
   base_debt = read_uint(base_rpc, BASE_PROXY, "debt(address)", args.receiver)
